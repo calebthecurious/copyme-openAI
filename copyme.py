@@ -18,6 +18,7 @@ def main():
     if validate_length(user_input):
         generate_copy_snippet(user_input)
         generate_keywords(user_input)
+        generate_synonyms(user_input)
 
     else:
         raise ValueError(f"Input length is too long. Must be under {MAX_INPUT_LENGTH}. Submitted input is {user_input}"
@@ -75,6 +76,30 @@ def generate_keywords(prompt: str) -> list[str]:
 
     print(f"keywords: {keywords_array}")
     return keywords_array
+
+
+def generate_synonyms(prompt: str) -> list[str]:
+    # Load your API key from an environment variable or secret management service
+
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    enriched_prompt = f"Generate synonyms for {prompt}:"
+    print(enriched_prompt)
+
+    response = openai.Completion.create(
+        engine="davinci-instruct-beta-v3", prompt=enriched_prompt, max_tokens=32)
+
+    # Extract output text.
+    synonyms_text = response["choices"][0]["text"]
+    synonyms_array = re.split(",|\n\|*|-", synonyms_text)
+    synonyms_array = [k.lower().strip()
+                      for k in synonyms_array if len(k) > 0]
+    keywords_array = [k for k in synonyms_array if len(k) > 0]
+
+    # Strip whitespace from response
+    copy_text = synonyms_text.strip()
+
+    print(f"synonyms: {synonyms_array}")
+    return synonyms_array
 
 
 if __name__ == '__main__':
