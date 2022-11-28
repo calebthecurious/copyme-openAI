@@ -1,8 +1,13 @@
 import os
-
+from typing import List
 import openai
 import argparse
 import re
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 MAX_INPUT_LENGTH = 32
 
@@ -25,6 +30,9 @@ def main():
                          )
 
 
+print(os.getenv("PATH"))
+
+
 def validate_length(prompt: str) -> bool:
     return len(prompt) <= MAX_INPUT_LENGTH
 
@@ -40,18 +48,17 @@ def generate_copy_snippet(prompt: str) -> str:
         engine="davinci-instruct-beta-v3", prompt=enriched_prompt, max_tokens=32)
 
     # Extract output text.
-    copy_text = response["choices"][0]["text"]
+    copy_text: str = response["choices"][0]["text"]
 
     # Strip whitespace from response
     copy_text = copy_text.strip()
 
     # Add ... to truncate statements
     last_char = copy_text[-1]
-
     if last_char not in {".", "!", "?"}:
         copy_text += "..."
 
-    print(f"Snippet: {copy_text}")
+    print(f"snippet: {copy_text}")
     return copy_text
 
 
@@ -66,13 +73,13 @@ def generate_keywords(prompt: str) -> list[str]:
         engine="davinci-instruct-beta-v3", prompt=enriched_prompt, max_tokens=32)
 
     # Extract output text.
-    keywords_text = response["choices"][0]["text"]
-    keywords_array = re.split(",|\n\|*|-", keywords_text)
-    keywords_array = [k.lower().strip() for k in keywords_array if len(k) > 0]
-    keywords_array = [k for k in keywords_array if len(k) > 0]
+    keywords_text: str = response["choices"][0]["text"]
 
     # Strip whitespace from response
-    copy_text = keywords_text.strip()
+    keywords_text = keywords_text.strip()
+    keywords_array = re.split(",|\n\|*|-", keywords_text)
+    keywords_array = [k.lower().strip() for k in keywords_array]
+    keywords_array = [k for k in keywords_array if len(k) > 0]
 
     print(f"keywords: {keywords_array}")
     return keywords_array
@@ -89,14 +96,13 @@ def generate_synonyms(prompt: str) -> list[str]:
         engine="davinci-instruct-beta-v3", prompt=enriched_prompt, max_tokens=32)
 
     # Extract output text.
-    synonyms_text = response["choices"][0]["text"]
-    synonyms_array = re.split(",|\n\|*|-", synonyms_text)
-    synonyms_array = [k.lower().strip()
-                      for k in synonyms_array if len(k) > 0]
-    keywords_array = [k for k in synonyms_array if len(k) > 0]
+    synonyms_text: str = response["choices"][0]["text"]
 
     # Strip whitespace from response
-    copy_text = synonyms_text.strip()
+    synonyms_text = synonyms_text.strip()
+    synonyms_array = re.split(",|\n\|*|-", synonyms_text)
+    synonyms_array = [k.lower().strip() for k in synonyms_array]
+    synonyms_array = [k for k in synonyms_array if len(k) > 0]
 
     print(f"synonyms: {synonyms_array}")
     return synonyms_array
